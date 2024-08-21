@@ -1,0 +1,7 @@
+/canal-adapter/logs/*
+/canal-serevr/logs/*
+/canal-serevr/conf/h2.mv.db
+/canal-serevr/conf/meta.dat
+/data/*
+/logs/*
+/mysql/data/*

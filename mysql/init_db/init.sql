@@ -1,0 +1,10 @@
+/*!40101 SET NAMES utf8 */;
+
+-- 创建账号
+CREATE USER canal IDENTIFIED BY 'canal';
+
+-- 授予权限
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'canal'@'%';
+
+-- 刷新权限
+FLUSH PRIVILEGES;

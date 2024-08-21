@@ -1,0 +1,56 @@
+PUT /hotel
+{
+    "aliases": {
+        "alias_hotel": {}
+    },
+    "settings": {
+        "index.number_of_shards": 1,
+        "index.number_of_replicas": 0,
+        "index.refresh_interval": "1s",
+        "index.max_result_window": 1000
+    },
+    "mappings": {
+        "properties": {
+            "name": {
+              "type": "text",
+              "analyzer": "ik_smart",
+              "search_analyzer": "ik_max_word"
+            },
+            "address": {
+              "type": "text",
+              "analyzer": "ik_smart",
+              "search_analyzer": "ik_max_word"
+            },
+            "price": {
+              "type": "integer"
+            },
+            "score": {
+              "type": "byte"
+            },
+            "brand": {
+              "type": "keyword"
+            },
+            "city": {
+              "type": "text",
+              "analyzer": "ik_smart",
+              "search_analyzer": "ik_max_word"
+            },
+            "star_name": {
+              "type": "keyword"
+            },
+            "business": {
+              "type": "keyword"
+            },
+            "latitude": {
+              "type": "keyword"
+            },
+            "longitude": {
+              "type": "keyword"
+            },
+            "pic": {
+              "type": "keyword",
+              "index": false
+            }
+        }
+    }
+}

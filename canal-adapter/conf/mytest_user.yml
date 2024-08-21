@@ -1,0 +1,28 @@
+dataSourceKey: defaultDS
+outerAdapterKey: exampleKey
+destination: example
+groupId: g1
+esMapping:
+  _index: hotel # 这里只能是索引，别名有问题
+  _id: _id
+  _type: _doc
+#  upsert: true
+#  pk: id
+  sql: "SELECT 
+          a.id AS _id, 
+          a.name, 
+          a.address, 
+          a.price, 
+          a.score, 
+          a.brand, 
+          a.city, 
+          a.star_name, 
+          a.business, 
+          a.latitude, 
+          a.longitude, 
+          a.pic 
+        FROM hotel a"
+#  objFields:
+#    _labels: array:;
+#  etlCondition: "where a.c_time>={}"
+  commitBatch: 3000

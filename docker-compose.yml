@@ -1,0 +1,113 @@
+version: '3.9'
+services:
+  es:
+    image: elasticsearch:8.12.0
+    container_name: es
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - "./data:/usr/share/elasticsearch/data"
+      - "./plugins:/usr/share/elasticsearch/plugins"
+      - "./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
+      - "./logs:/usr/share/elasticsearch/logs"
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      discovery.type: "single-node"
+      TZ: "Asia/Shanghai"
+      LANG: "en_US.UTF-8"
+      ELASTIC_PASSWORD: "123456"
+    networks:
+      - es-net
+
+  kibana:
+    image: kibana:8.12.0
+    container_name: kibana
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    volumes:
+      - "./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml"
+    depends_on:
+      - es
+    links:
+      - es
+    networks:
+      - es-net
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.18
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/init_db/:/docker-entrypoint-initdb.d/
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: shopping
+      character-set-server: utf8mb4
+      collation-server: utf8mb4_general_ci
+    restart: unless-stopped
+    privileged: true
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "--silent" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    networks:
+      - es-net
+
+  canal-server:
+    container_name: canal-server
+    image: canal/canal-server:v1.1.7
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - 11111:11111
+    volumes:
+      - "./canal-server/logs/:/home/admin/canal-server/logs/"
+      - "./canal-server/conf/:/home/admin/canal-server/conf/example/"
+    depends_on:
+      - mysql
+      - es
+    links:
+      - mysql
+      - es
+    networks:
+      - es-net
+
+  canal-adapter:
+    container_name: canal-adapter
+    image: slpcat/canal-adapter:v1.1.5
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    volumes:
+      - "./canal-adapter/conf/application.yml:/opt/canal-adapter/conf/application.yml"
+      - "./canal-adapter/conf/mytest_user.yml:/opt/canal-adapter/conf/es7/mytest_user.yml"
+      - "./canal-adapter/logs/:/opt/canal-adapter/logs/"
+      - "./canal-adapter/lib/druid-1.2.14.jar:/opt/canal-adapter/lib/druid-1.2.14.jar"
+      - "./canal-adapter/lib/mysql-connector-java-8.0.18.jar:/opt/canal-adapter/lib/mysql-connector-java-8.0.18.jar"
+    depends_on:
+      - mysql
+      - es
+      - canal-server
+    links:
+      - mysql
+      - es
+      - canal-server
+    networks:
+      - es-net
+
+
+networks:
+  es-net:
+    driver: bridge
